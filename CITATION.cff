@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use BrainBug, please cite this repository and the official MaleCNS/FlyWire sources listed in THIRD_PARTY_NOTICES.md."
+title: "BrainBug"
+type: software
+authors:
+  - family-names: "OÜ"
+    given-names: "Robillionair"
+version: 1.0.0
+date-released: 2026-09-11
+license: MIT
+repository-code: "https://github.com/Rob-bio4/Brainbug"
+url: "https://github.com/Rob-bio4/Brainbug"
+abstract: "A playful local-AI experiment that visualizes simulated activity over real MaleCNS v1.0 fruit-fly neuron morphology."
+keywords:
+  - connectome
+  - drosophila
+  - FlyWire
+  - MaleCNS
+  - local AI
+  - biological computing

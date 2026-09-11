@@ -1,0 +1,25 @@
+{
+  "name": "brainbug",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A playful local-AI experiment visualized through real MaleCNS v1.0 fruit-fly connectome morphology.",
+  "homepage": "https://github.com/Rob-bio4/Brainbug#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rob-bio4/Brainbug.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Rob-bio4/Brainbug/issues"
+  },
+  "type": "module",
+  "scripts": {
+    "setup:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-windows.ps1",
+    "start": "node server.mjs",
+    "test": "node test/activity.mjs && node --check server.mjs && node --check public/app.js",
+    "refresh:connectome": "node scripts/build-mcns-data.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

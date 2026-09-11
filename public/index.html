@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="BrainBug — a tiny local intelligence, with simulated electrical activity in real MaleCNS v1.0 fruit fly neurons.">
+  <title>BrainBug — a little life in the machine</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23000'/%3E%3Cpath d='M17 16l30 32M47 16L17 48M18 24h28M18 40h28' fill='none' stroke='%23bcefff' stroke-width='4'/%3E%3C/svg%3E">
+  <style>
+    :root{color-scheme:dark;--bg:#000;--text:#f4f6fa;--muted:#9ba6b5;--line:rgba(187,218,255,.13);--blue:#a3dfff;--ice:#d7f4ff;--acid:#d3ff72;--font:"Helvetica Neue",Arial,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}
+    html{min-width:280px;background:var(--bg)}
+    body{margin:0;min-height:100vh;background:#000;color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased}
+    button,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:wait}a{color:inherit;text-underline-offset:4px}
+    button:focus-visible,a:focus-visible,canvas:focus-visible{outline:2px solid var(--blue);outline-offset:5px}
+    .shell{width:min(1560px,calc(100% - 72px));margin:auto;padding:30px 0 24px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:flex;align-items:center;gap:13px;text-decoration:none}
+    .brand-mark{width:26px;height:34px;color:var(--ice)}.brand-mark svg{width:100%;height:100%}
+    .brand-name{font-size:26px;line-height:1;letter-spacing:-1.3px;font-weight:400}.brand-name sup{font-size:10px;vertical-align:top;margin-left:4px;letter-spacing:0}
+    .top-meta{display:flex;align-items:center;gap:6px;padding:5px;background:#101116;border:1px solid rgba(255,255,255,.035);border-radius:40px}
+    .pill{padding:10px 15px;font-size:12px;color:#c4cbd6;white-space:nowrap}.pill+.pill{border-left:1px solid var(--line)}
+    .live-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--blue);margin-right:8px}
+    .hero{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;margin:48px 0 28px}
+    .eyebrow{font-size:14px;letter-spacing:-.2px;color:#aeb9c7;margin-bottom:12px}
+    h1{font-size:clamp(42px,5.2vw,78px);line-height:.94;letter-spacing:-.065em;font-weight:400;margin:0}
+    h1 span{color:#9caabd}
+    .hero-copy{max-width:280px;color:var(--muted);font-size:16px;line-height:1.5;margin:0 0 3px}
+    .workspace{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(340px,1fr);gap:28px;align-items:start}
+    .brain-panel{min-width:0;background:#000}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 0;border-top:1px solid var(--line)}
+    .panel-title{font-size:16px;font-weight:400;letter-spacing:-.35px}.panel-title span{color:var(--muted);margin-left:7px;font-size:13px}
+    .panel-kicker{font-size:12px;color:var(--muted);line-height:1.4;text-align:right}
+    .brain-stage{position:relative;height:clamp(380px,48vh,600px);background:#000;isolation:isolate}
+    #brainCanvas{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none;background:#000}
+    #brainCanvas:active{cursor:grabbing}
+    .stage-tag{position:absolute;top:8px;left:0;color:#8293a7;font-size:12px;pointer-events:none}
+    .stage-tag strong{color:#c3d7eb;font-weight:400}
+    .viewer-tools{position:absolute;right:0;bottom:14px;display:flex;align-items:center;gap:12px;font-size:12px;color:#8b99ab;pointer-events:none}
+    .viewer-tools button{pointer-events:auto;border:1px solid var(--line);background:#0c0f16;color:var(--ice);border-radius:30px;padding:9px 15px}
+    .viewer-tools button:hover{background:#172131}
+    .legend{display:flex;flex-wrap:wrap;gap:10px 17px;padding:14px 0 19px;font-size:12px;color:#a8b3c2}
+    .legend span{display:inline-flex;align-items:center;gap:7px}.legend i{display:inline-block;width:14px;height:2px;background:var(--swatch)}
+    .activity{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+    .activity-cell{padding:18px 22px 10px 0}.activity-cell+.activity-cell{padding-left:22px;border-left:1px solid var(--line)}
+    .metric-label{font-size:12px;color:var(--muted)}.metric-value{font-size:20px;letter-spacing:-.5px;margin-top:9px}.metric-value em{font-style:normal;font-size:13px;color:#a1b6cd;margin-left:4px}
+    .meter{height:2px;background:#111720;margin-top:15px;overflow:hidden}.meter>span{display:block;height:100%;background:var(--blue);transition:width .2s}
+    .agent-panel{min-width:0;border:1px solid rgba(174,207,255,.17);border-radius:26px;background:linear-gradient(150deg,#111821 0%,#070a10 58%,#0c1524 100%);overflow:hidden}
+    .agent-panel .panel-head{border-top:0;border-bottom:1px solid var(--line);padding:20px 24px}
+    .agent-body{padding:24px;display:flex;flex-direction:column;gap:18px}
+    .prompt-label{display:block;font-size:14px;color:#b6c2d1;margin-bottom:10px}
+    .prompt-box{border:1px solid rgba(169,207,255,.2);border-radius:15px;background:rgba(0,0,0,.4);padding:15px 16px}
+    .prompt-box:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(113,192,255,.08)}
+    #prompt{display:block;width:100%;min-height:58px;background:transparent;border:0;outline:0;resize:vertical;color:var(--text);font-size:18px;letter-spacing:-.35px;line-height:1.4}#prompt::placeholder{color:#7d8a9e}
+    .preset-row{display:flex;flex-wrap:wrap;gap:7px}.preset{border:1px solid var(--line);background:rgba(149,196,255,.025);color:#b4c0d0;border-radius:30px;padding:8px 11px;font-size:12px}.preset:hover{color:var(--ice);border-color:#7cb6dc;background:#152232}
+    .run-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    #runBtn{border:0;border-radius:30px;padding:13px 20px;background:var(--acid);color:#0b1104;font-size:14px;letter-spacing:-.2px;transition:background .2s}#runBtn:hover{background:#e3ffa6}#runBtn:disabled{background:#b7d7e8;color:#0d1b27}
+    .tiny-status{color:var(--muted);font-size:12px;max-width:130px;text-align:right;line-height:1.4}
+    .console{min-height:178px;border-top:1px solid var(--line);padding-top:18px}.console-head{font-size:12px;color:#8497ae;margin-bottom:12px}
+    #consoleOutput{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;color:#e3edf8;font:400 16px/1.55 var(--font);letter-spacing:-.15px}
+    .output-accent{color:var(--ice)}.output-muted{color:#93a6bc;font-size:13px}
+    .current-region{display:grid;grid-template-columns:3px minmax(0,1fr) auto;align-items:center;gap:12px;padding:16px 0 0;border-top:1px solid var(--line)}
+    .region-orb{width:3px;height:32px;background:#7593aa;border-radius:2px;transition:background .2s}
+    .region-name{font-size:14px;letter-spacing:-.25px}.region-role{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}.region-stage{font-size:12px;color:#a6d0ec;text-align:right;max-width:95px}
+    .foot{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-top:28px;padding-top:18px;border-top:1px solid var(--line);color:#8695a9;font-size:12px;line-height:1.5}.disclaimer{max-width:680px}.foot a{white-space:nowrap;color:#bcc9da}
+    @media(min-width:1500px){.hero{margin-top:60px}.brain-stage{height:560px}}
+    @media(max-width:1000px){.shell{width:calc(100% - 40px)}.workspace{gap:20px;grid-template-columns:minmax(0,1.3fr) minmax(320px,1fr)}.agent-body{padding:20px}.top-meta .pill:first-child{display:none}.top-meta .pill+.pill{border-left:0}.hero-copy{max-width:230px}.brain-stage{height:460px}.run-row{flex-wrap:wrap}.tiny-status{text-align:left}}
+    @media(max-width:760px){.workspace{grid-template-columns:1fr}.hero{margin-top:36px;gap:22px;align-items:flex-start;flex-direction:column}.hero-copy{max-width:390px}.brain-stage{height:420px}.agent-panel{margin-top:12px}.foot{flex-direction:column;gap:10px}.activity-cell{padding-right:12px}.panel-kicker{max-width:150px}}
+    @media(max-width:440px){.shell{width:calc(100% - 32px);padding-top:22px}.brand-name{font-size:24px}.brand-mark{width:21px}.top-meta{max-width:145px}.pill{font-size:11px;white-space:normal;padding:7px 10px}.hero{margin-bottom:25px}.brain-stage{height:340px}.viewer-tools{font-size:11px;gap:8px}.agent-body{padding:18px}.agent-panel .panel-head{padding:18px}.legend{gap:10px 13px}}
+    @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="BrainBug home"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 26 34" fill="none"><path d="M4 2c0 15 18 15 18 30M22 2C22 17 4 17 4 32M6 9h14M6 25h14" stroke="currentColor" stroke-width="2.5"/></svg></div><div class="brand-name">BrainBug<sup>™</sup></div></a>
+      <div class="top-meta"><div class="pill" id="graphBadge">MaleCNS v1.0</div><div class="pill" id="modelBadge">Local intelligence · starting</div></div>
+    </header>
+    <section class="hero">
+      <div><div class="eyebrow">Fruit fly. Meet artificial intelligence.</div><h1>Small brain.<br><span>Electric thoughts.</span></h1></div>
+      <p class="hero-copy">A little life in the machine.<br>Ask a question. Watch the neurons light up.</p>
+    </section>
+    <section class="workspace" aria-label="BrainBug simulator">
+      <article class="brain-panel" aria-label="Fruit fly brain">
+        <div class="panel-head"><div class="panel-title">MaleCNS <span>v1.0</span></div><div class="panel-kicker" id="cycleLabel">At rest</div></div>
+        <div class="brain-stage">
+          <canvas id="brainCanvas" tabindex="0" aria-label="Real MaleCNS neuron morphology in 3D. Drag to rotate, scroll to zoom; arrow keys rotate, plus and minus zoom."></canvas>
+          <div class="stage-tag">Real morphology <strong>· simulated activity</strong></div>
+          <div class="viewer-tools"><span>Drag to rotate · scroll to zoom</span><button id="resetView" type="button">Reset view</button></div>
+        </div>
+        <div class="legend" aria-label="Neuron groups">
+          <span><i style="--swatch:#73c7ff"></i>Visual</span><span><i style="--swatch:#c5a2ff"></i>Association</span><span><i style="--swatch:#ff9b54"></i>Central complex</span><span><i style="--swatch:#7df7cc"></i>Olfactory / GNG</span><span><i style="--swatch:#f98bb3"></i>Motor</span>
+        </div>
+        <div class="activity">
+          <div class="activity-cell"><div class="metric-label">Circuit activity</div><div class="metric-value" id="synapseValue">At rest <em>no firing</em></div><div class="meter"><span id="synapseMeter" style="width:0%"></span></div></div>
+          <div class="activity-cell"><div class="metric-label">Local intelligence</div><div class="metric-value" id="confidenceValue">0.5B <em>parameters</em></div><div class="meter"><span id="confidenceMeter" style="width:0%"></span></div></div>
+        </div>
+      </article>
+      <article class="agent-panel" aria-label="Ask BrainBug">
+        <div class="panel-head"><div class="panel-title">Ask BrainBug</div><div class="panel-kicker">Small questions.<br>Very dramatic neurons.</div></div>
+        <div class="agent-body">
+          <div><label class="prompt-label" for="prompt">What's on your mind?</label><div class="prompt-box"><textarea id="prompt" rows="2" placeholder="What is the speed of light?">What is the speed of light?</textarea></div></div>
+          <div class="preset-row" aria-label="Example questions"><button class="preset" data-prompt="What is the speed of light?">Speed of light</button><button class="preset" data-prompt="Why is the sky blue?">Blue skies</button><button class="preset" data-prompt="What is 17 times 23?">Tiny arithmetic</button></div>
+          <div class="run-row"><button id="runBtn" type="button">Ask the brain ↗</button><span class="tiny-status" id="runStatus" role="status">Ready when you are</span></div>
+          <div class="console"><div class="console-head">Response</div><div id="consoleOutput" role="status" aria-live="polite"><span class="output-muted">A tiny local mind, waiting for a thought.</span></div></div>
+          <div class="current-region"><div class="region-orb" id="regionOrb" aria-hidden="true"></div><div><div class="region-name" id="regionName">Circuit at rest</div><div class="region-role" id="regionRole">Waiting for a question</div></div><div class="region-stage" id="regionStage">Quiet</div></div>
+        </div>
+      </article>
+    </section>
+    <footer class="foot"><div class="disclaimer">Real MaleCNS v1.0 neuron sample · HHMI Janelia / FlyEM · CC-BY 4.0.<br>Activity is a simplified connectome simulation. Answers come from a separate local language model.</div><a href="https://male-cns.janelia.org/download/" target="_blank" rel="noreferrer">Explore the original data ↗</a></footer>
+  </main>
+  <script src="mcns-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

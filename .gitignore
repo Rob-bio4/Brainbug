@@ -1,0 +1,15 @@
+# Local model and llama.cpp runtime (downloaded by setup)
+runtime/
+
+# Local configuration
+.env
+.env.local
+
+# Logs and operating-system files
+*.log
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
